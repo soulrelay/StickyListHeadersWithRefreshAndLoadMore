@@ -40,9 +40,6 @@
 
 ![这里写图片描述](https://github.com/soulrelay/StickyListHeadersWithRefreshAndLoadMore/blob/master/sample/res/raw/3.gif)
 
-## <font color=#C4573C size=5 face="黑体">源码下载</font>
-
-[军团再临传送门](http://download.csdn.net/detail/s003603u/9638917)
 
 
 
