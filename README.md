@@ -1,293 +1,50 @@
-StickyListHeaders
-=================
-StickyListHeaders is an Android library that makes it easy to integrate section headers in your `ListView`. These section headers stick to the top like in the new People app of Android 4.0 Ice Cream Sandwich. This behavior is also found in lists with sections on iOS devices. This library can also be used without the sticky functionality if you just want section headers.
+## <font color=#C4573C size=5 face="黑体">需求</font>
+### <font color=#C4573C size=4 face="黑体">直播入口</font>
 
-StickyListHeaders actively supports android versions 2.3 (gingerbread) and above.
-That said, it works all the way down to 2.1 but is not actively tested or working perfectly.
+![这里写图片描述](http://img.blog.csdn.net/20160924143742239)
 
-Here is a short gif showing the functionality you get with this library:
+### <font color=#C4573C size=4 face="黑体">功能点</font>
+>*  下拉刷新历史数据（这里自定义了refresh header，颠球，射门一气呵成~~）
+>*  上拉加载更多比赛
+>*   时间头悬浮
+>*   两个“今天”的定位锚点
+>*   内部相关的业务模型采用MVP构建
+算是对[Android-architecture之MVC、MVP、MVVM、Data-Binding](http://blog.csdn.net/s003603u/article/details/51393218%20%E2%80%9CAndroid-architecture%E4%B9%8BMVC%E3%80%81MVP%E3%80%81MVVM%E3%80%81Data-Binding%E2%80%9D)中的MVP进一步的升级，抽取出了BasePresenter、BaseView、MVPBaseActivity、MVPBaseFragment，并通过使用弱引用预防可能发生的内存泄露问题
+这里就不做赘述，后续有时间会整理一下（基于MVP模型构建多接口，多嵌套复杂数据类型，多视图的的多交互模型）
 
-![alt text](https://github.com/emilsjolander/StickyListHeaders/raw/master/demo.gif "Demo gif")
+### <font color=#C4573C size=4 face="黑体">我的预约</font>
 
+![这里写图片描述](http://img.blog.csdn.net/20160923114144939)
 
-Goal
-----
-The goal of this project is to deliver a high performance replacement to `ListView`. You should with minimal effort and time be able to add section headers to a list. This should be done via a simple to use API without any special features. This library will always priorities general use cases over special ones. This means that the library will add very few public methods to the standard `ListView` and will not try to work for every use case. While I will want to support even narrow use cases I will not do so if it compromises the API or any other feature.
+### <font color=#C4573C size=4 face="黑体">功能点</font>
+>* 相对于直播入口少了些相关交互功能
+>* 增加了左滑删除取消预约的功能
+>* 还有一个隐藏功能，就是多页面的比赛预约同步处理，这里采用[EventBus](http://blog.csdn.net/s003603u/article/details/51852019)事件总线库进行组件间的通信，然后根据通知做相应的业务处理
+## <font color=#C4573C size=5 face="黑体">实战</font>
+### <font color=#C4573C size=4 face="黑体">控件原型搭建</font>
+秉着不重复造轮子的宗旨，使用了如下著名的开源控件
+>* 悬浮头置顶功能
+    StickyListHeaders 
+    An android library for section headers that stick to the top
+    https://github.com/emilsjolander/StickyListHeaders
+>* 下拉刷新 上拉加载更多
+   SwipeToLoadLayout
+   A reusable pull-to-refresh and pull-to-loadmore widget
+   https://github.com/Aspsine/SwipeToLoadLayout
+   >* 左滑删除见代码中的SwipeLayout，暂时找不到来源了
 
+### <font color=#C4573C size=4 face="黑体">最终的效果图</font>
+这个是在StickyListHeaders的基础上，整合了SwipeToLoadLayout和SwipeLayout
 
-Installing
----------------
-###Maven
-Add the following maven dependency exchanging `x.x.x` for the latest release.
-```XML
-<dependency>
-    <groupId>se.emilsjolander</groupId>
-    <artifactId>stickylistheaders</artifactId>
-    <version>x.x.x</version>
-</dependency>
-```
+注意：  基于项目需求对部分开源控件做了相应的调整 
 
-###Gradle
-Add the following gradle dependency exchanging `x.x.x` for the latest release.
-```groovy
-dependencies {
-    compile 'se.emilsjolander:stickylistheaders:x.x.x'
-}
-```
+![这里写图片描述](http://img.blog.csdn.net/20160923115023333)
 
-###Cloning
-First of all you will have to clone the library.
-```shell
-git clone https://github.com/emilsjolander/StickyListHeaders.git
-```
+## <font color=#C4573C size=5 face="黑体">源码下载</font>
 
-Now that you have the library you will have to import it into Android Studio.
-In Android Studio navigate the menus like this.
-```
-File -> Import Project ...
-```
-In the following dialog navigate to StickyListHeaders which you cloned to your computer in the previous steps and select the `build.gradle`.
-
-Getting Started
----------------
-###Base usage
-
-Ok lets start with your activities or fragments xml file. It might look something like this.
-```xml
-<se.emilsjolander.stickylistheaders.StickyListHeadersListView
-    android:id="@+id/list"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"/>
-```
-
-Now in your activities `onCreate()` or your fragments `onCreateView()` you would want to do something like this
-```java
-StickyListHeadersListView stickyList = (StickyListHeadersListView) findViewById(R.id.list);
-MyAdapter adapter = new MyAdapter(this);
-stickyList.setAdapter(adapter);
-```
-
-`MyAdapter` in the above example would look something like this if your list was a list of countries where each header was for a letter in the alphabet.
-```java
-public class MyAdapter extends BaseAdapter implements StickyListHeadersAdapter {
-
-    private String[] countries;
-    private LayoutInflater inflater;
-
-    public MyAdapter(Context context) {
-        inflater = LayoutInflater.from(context);
-        countries = context.getResources().getStringArray(R.array.countries);
-    }
-
-    @Override
-    public int getCount() {
-        return countries.length;
-    }
-
-    @Override
-    public Object getItem(int position) {
-        return countries[position];
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
-    @Override 
-    public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder holder;
-
-        if (convertView == null) {
-            holder = new ViewHolder();
-            convertView = inflater.inflate(R.layout.test_list_item_layout, parent, false);
-            holder.text = (TextView) convertView.findViewById(R.id.text);
-            convertView.setTag(holder);
-        } else {
-            holder = (ViewHolder) convertView.getTag();
-        }
-
-        holder.text.setText(countries[position]);
-
-        return convertView;
-    }
-
-    @Override 
-    public View getHeaderView(int position, View convertView, ViewGroup parent) {
-        HeaderViewHolder holder;
-        if (convertView == null) {
-            holder = new HeaderViewHolder();
-            convertView = inflater.inflate(R.layout.header, parent, false);
-            holder.text = (TextView) convertView.findViewById(R.id.text);
-            convertView.setTag(holder);
-        } else {
-            holder = (HeaderViewHolder) convertView.getTag();
-        }
-        //set header text as first char in name
-        String headerText = "" + countries[position].subSequence(0, 1).charAt(0);
-        holder.text.setText(headerText);
-        return convertView;
-    }
-
-    @Override
-    public long getHeaderId(int position) {
-        //return the first character of the country as ID because this is what headers are based upon
-        return countries[position].subSequence(0, 1).charAt(0);
-    }
-
-    class HeaderViewHolder {
-        TextView text;
-    }
-
-    class ViewHolder {
-        TextView text;
-    }
-    
-}
-```
-
-That's it! Look through the API docs below to get know about things to customize and if you have any problems getting started please open an issue as it probably means the getting started guide need some improvement!
-
-###Styling
-
-You can apply your own theme to `StickyListHeadersListView`s. Say you define a style called `Widget.MyApp.ListView` in values/styles.xml:
-```xml
-<resources>
-    <style name="Widget.MyApp.ListView" parent="@android:style/Widget.ListView">
-        <item name="android:paddingLeft">@dimen/vertical_padding</item>
-        <item name="android:paddingRight">@dimen/vertical_padding</item>
-    </style>
-</resources>
-```
-
-You can then apply this style to all `StickyListHeadersListView`s by adding something like this to your theme (e.g. values/themes.xml):
-```xml
-<resources>
-    <style name="Theme.MyApp" parent="android:Theme.NoTitleBar">
-        <item name="stickyListHeadersListViewStyle">@style/Widget.MyApp.ListView</item>
-    </style>
-</resources>
-```
-
-###Expandable support
-Now, you can use `ExpandableStickyListHeadersListView` to expand/collapse subitems.
-xml first
-```xml
-<se.emilsjolander.stickylistheaders.ExpandableStickyListHeadersListView
-    android:id="@+id/list"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"/>
-```
-Then you need to setup your listview on `onCreate()` or `onCreateView()`：
-```java
-ExpandableStickyListHeadersListView expandableStickyList = (ExpandableStickyListHeadersListView) findViewById(R.id.list);
-StickyListHeadersAdapter adapter = new MyAdapter(this);
-expandableStickyList.setAdapter(adapter);
-expandableStickyList.setOnHeaderClickListener(new StickyListHeadersListView.OnHeaderClickListener() {
-            @Override
-            public void onHeaderClick(StickyListHeadersListView l, View header, int itemPosition, long headerId, boolean currentlySticky) {
-                if(expandableStickyList.isHeaderCollapsed(headerId)){
-                    expandableStickyList.expand(headerId);
-                }else {
-                    expandableStickyList.collapse(headerId);
-                }
-            }
-        });
-```
-As you see, MyAdapter is just a StickyListHeadersAdapter which is mentioned in the previous section.
-You needn't do any more extra operations.
-
-There are three important functions:
-`isHeaderCollapsed(long headerId)`,`expand(long headerId)` and `collapse(long headerId)`.
-
-The function `isHeaderCollapsed` is used to check whether the subitems belonging to the header have collapsed.
-You can call `expand` or `collapse` method to hide or show subitems.
-You can also define a AnimationExecutor which implements `ExpandableStickyListHeadersListView.IAnimationExecutor`,
-and put it into the ExpandableStickyListHeadersListView by `setAnimExecutor` method,if you want more fancy animation when hiding or showing subitems.
+[军团再临传送门](http://download.csdn.net/detail/s003603u/9638917)
 
 
-Upgrading from 1.x versions
----------------------------
-First of all the package name has changed from `com.emilsjolander.components.stickylistheaders` -> `se.emilsjolander.stickylistheaders` so update all your imports and xml files using StickyListHeaders!
-
-If you are Upgrading from a version prior to 2.x you might run into the following problems.
-1. `StickyListHeadersListView` is no longer a `ListView` subclass. This means that it cannot be passed into a method expecting a ListView. You can retrieve an instance of the `ListView` via `getWrappedList()` but use this with caution as things will probably break if you start setting things directly on that list.
-2. Because `StickyListHeadersListView` is no longer a `ListView` it does not support all the methods. I have implemented delegate methods for all the usual methods and gladly accept pull requests for more.
-
-API
----
-###StickyListHeadersAdapter
-```java
-public interface StickyListHeadersAdapter extends ListAdapter {
-    View getHeaderView(int position, View convertView, ViewGroup parent);
-    long getHeaderId(int position);
-}
-```
-Your adapter must implement this interface to function with `StickyListHeadersListView`.
-`getHeaderId()` must return a unique integer for every section. A valid implementation for a list with alphabetical sections is the return the char value of the section that `position` is a part of.
-
-`getHeaderView()` works exactly like `getView()` in a regular `ListAdapter`.
 
 
-###StickyListHeadersListView
-Headers are sticky by default but that can easily be changed with this setter. There is of course also a matching getter for the sticky property.
-```java
-public void setAreHeadersSticky(boolean areHeadersSticky);
-public boolean areHeadersSticky();
-```
 
-A `OnHeaderClickListener` is the header version of OnItemClickListener. This is the setter for it and the interface of the listener. The currentlySticky boolean flag indicated if the header that was clicked was sticking to the top at the time it was clicked.
-```java
-public void setOnHeaderClickListener(OnHeaderClickListener listener);
-
-public interface OnHeaderClickListener {
-    public void onHeaderClick(StickyListHeadersListView l, View header, int itemPosition, long headerId, boolean currentlySticky);
-}
-```
-
-A `OnStickyHeaderOffsetChangedListener` is a Listener used for listening to when the sticky header slides out of the screen. The offset parameter will slowly grow to be the same size as the headers height. Use the listeners callback to transform the header in any way you see fit, the standard android contacts app dims the text for example.
-```java
-public void setOnStickyHeaderOffsetChangedListener(OnStickyHeaderOffsetChangedListener listener);
-
-public interface OnStickyHeaderOffsetChangedListener {
-    public void onStickyHeaderOffsetChanged(StickyListHeadersListView l, View header, int offset);
-}
-```
-
-A `OnStickyHeaderChangedListener` listens for changes to the header.  This enables UI elements elsewhere to react to the current header (e.g. if each header is a date, then the rest of the UI can update when you scroll to a new date).
-```java
-public void setOnStickyHeaderChangedListener(OnStickyHeaderChangedListener listener);
-
-public interface OnStickyHeaderChangedListener {
-    void onStickyHeaderChanged(StickyListHeadersListView l, View header, int itemPosition, long headerId);
-}
-```
-
-Here are two methods added to the API for inspecting the children of the underlying `ListView`. I could not override the normal `getChildAt()` and `getChildCount()` methods as that would mess up the underlying measurement system of the `FrameLayout` wrapping the `ListView`.
-```java
-public View getListChildAt(int index);
-public int getListChildCount();
-```
-
-This is a setter and getter for an internal attribute that controls if the list should be drawn under the stuck header. The default value is true. If you do not want to see the list scroll under your header you will want to set this attribute to `false`.
-```java
-public void setDrawingListUnderStickyHeader(boolean drawingListUnderStickyHeader);
-public boolean isDrawingListUnderStickyHeader();
-```
-
-If you are using a transparent action bar the following getter+setter will be very helpful. Use them to set the position of the sticky header from the top of the view.
-```java
-public void setStickyHeaderTopOffset(int stickyHeaderTopOffset);
-public int getStickyHeaderTopOffset();
-```
-
-Get the amount of overlap the sticky header has when position in on the top of the list.
-```java
-public int getHeaderOverlap(int position);
-```
-
-Contributing
-------------
-Contributions are very welcome. Now that this library has grown in popularity i have a hard time keeping upp with all the issues while tending to a multitude of other projects as well as school. So if you find a bug in the library or want a feature and think you can fix it yourself, fork + pull request and i will greatly appreciate it!
-
-I love getting pull requests for new features as well as bugs. However, when it comes to new features please also explain the use case and way you think the library should include it. If you don't want to start coding a feature without knowing if the feature will have chance of being included, open an issue and we can discuss the feature!
