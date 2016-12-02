@@ -1,7 +1,7 @@
 ## <font color=#C4573C size=5 face="黑体">需求</font>
 ### <font color=#C4573C size=4 face="黑体">直播入口</font>
 
-![这里写图片描述](http://img.blog.csdn.net/20160924143742239)
+![这里写图片描述](https://github.com/soulrelay/StickyListHeadersWithRefreshAndLoadMore/blob/master/sample/res/raw/1.gif)
 
 ### <font color=#C4573C size=4 face="黑体">功能点</font>
 >*  下拉刷新历史数据（这里自定义了refresh header，颠球，射门一气呵成~~）
@@ -14,7 +14,7 @@
 
 ### <font color=#C4573C size=4 face="黑体">我的预约</font>
 
-![这里写图片描述](http://img.blog.csdn.net/20160923114144939)
+![这里写图片描述](https://github.com/soulrelay/StickyListHeadersWithRefreshAndLoadMore/blob/master/sample/res/raw/2.gif)
 
 ### <font color=#C4573C size=4 face="黑体">功能点</font>
 >* 相对于直播入口少了些相关交互功能
@@ -38,7 +38,7 @@
 
 注意：  基于项目需求对部分开源控件做了相应的调整 
 
-![这里写图片描述](http://img.blog.csdn.net/20160923115023333)
+![这里写图片描述](https://github.com/soulrelay/StickyListHeadersWithRefreshAndLoadMore/blob/master/sample/res/raw/3.gif)
 
 ## <font color=#C4573C size=5 face="黑体">源码下载</font>
 
