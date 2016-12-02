@@ -1,0 +1,30 @@
+apply plugin: 'com.android.application'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile project(':library')
+    compile 'com.android.support:appcompat-v7:22.0.+'
+    compile 'com.nineoldandroids:library:2.4.0+'
+}
+
+android {
+    compileSdkVersion 24
+    buildToolsVersion '24.0.1'
+
+    defaultConfig {
+        applicationId 'se.emilsjolander.stickylistheaders'
+        minSdkVersion 8
+        targetSdkVersion 22
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            res.srcDirs = ['res']
+        }
+    }
+}
